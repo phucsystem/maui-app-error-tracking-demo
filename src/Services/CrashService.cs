@@ -4,36 +4,51 @@ namespace MauiFirebaseMetrics.Services;
 
 public class CrashService
 {
-    private readonly IFirebaseCrashlytics _crashlytics;
+    private readonly IFirebaseCrashlytics? _crashlytics;
+    private readonly bool _isEnabled;
 
     public CrashService()
     {
-        _crashlytics = CrossFirebaseCrashlytics.Current;
-        _crashlytics.SetCrashlyticsCollectionEnabled(true);
+        try
+        {
+            _crashlytics = CrossFirebaseCrashlytics.Current;
+            _crashlytics.SetCrashlyticsCollectionEnabled(true);
+            _isEnabled = true;
+        }
+        catch (Exception ex)
+        {
+            _isEnabled = false;
+            System.Diagnostics.Debug.WriteLine($"Crashlytics unavailable: {ex.Message}");
+        }
     }
 
     public void RecordNonFatal(Exception exception, string? context = null)
     {
+        if (!_isEnabled) return;
+
         if (context is not null)
         {
-            _crashlytics.SetCustomKey("error_context", context);
+            _crashlytics!.SetCustomKey("error_context", context);
         }
 
-        _crashlytics.RecordException(exception);
+        _crashlytics!.RecordException(exception);
     }
 
     public void SetMetadata(string key, string value)
     {
-        _crashlytics.SetCustomKey(key, value);
+        if (!_isEnabled) return;
+        _crashlytics!.SetCustomKey(key, value);
     }
 
     public void Log(string message)
     {
-        _crashlytics.Log(message);
+        if (!_isEnabled) return;
+        _crashlytics!.Log(message);
     }
 
     public void SetUserId(string userId)
     {
-        _crashlytics.SetUserId(userId);
+        if (!_isEnabled) return;
+        _crashlytics!.SetUserId(userId);
     }
 }

@@ -10,20 +10,19 @@ public partial class MainPage : ContentPage
     {
         _performanceService = performanceService;
         InitializeComponent();
-
-        MainWebView.Navigating += OnWebViewNavigating;
-        MainWebView.Navigated += OnWebViewNavigated;
     }
 
-    private void OnWebViewNavigating(object? sender, WebNavigatingEventArgs args)
+    public void HideLoadingIndicator()
     {
-        LoadingIndicator.IsVisible = true;
-        LoadingIndicator.IsRunning = true;
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            LoadingIndicator.IsVisible = false;
+            LoadingIndicator.IsRunning = false;
+        });
     }
 
-    private void OnWebViewNavigated(object? sender, WebNavigatedEventArgs args)
+    private void OnTriggerCrashClicked(object? sender, EventArgs args)
     {
-        LoadingIndicator.IsVisible = false;
-        LoadingIndicator.IsRunning = false;
+        throw new Exception("Test crash triggered by user");
     }
 }

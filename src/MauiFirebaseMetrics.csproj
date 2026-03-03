@@ -10,7 +10,7 @@
 		<Nullable>enable</Nullable>
 
 		<ApplicationTitle>WebMetrics</ApplicationTitle>
-		<ApplicationId>com.medadvisor.webmetrics</ApplicationId>
+		<ApplicationId>com.phucsystemlabs.ma-ui-error-tracking</ApplicationId>
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 

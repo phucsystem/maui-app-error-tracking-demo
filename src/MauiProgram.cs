@@ -50,7 +50,14 @@ public static class MauiProgram
 #if IOS
             events.AddiOS(iOS => iOS.WillFinishLaunching((_, __) =>
             {
-                CrossFirebase.Initialize();
+                try
+                {
+                    CrossFirebase.Initialize();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Firebase init failed (missing GoogleService-Info.plist?): {ex.Message}");
+                }
                 return false;
             }));
 #endif

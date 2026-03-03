@@ -11,6 +11,8 @@ public class NavigationDelegate : WKNavigationDelegate
     private readonly DownloadService _downloadService;
     private DateTime _navigationStartTime;
 
+    public event Action? NavigationCompleted;
+
     public NavigationDelegate(
         CrashService crashService,
         PerformanceService performanceService,
@@ -40,6 +42,7 @@ public class NavigationDelegate : WKNavigationDelegate
         _crashService.RecordNonFatal(
             new Exception(errorMessage),
             context: "WKNavigationDelegate.DidFailProvisionalNavigation");
+        NavigationCompleted?.Invoke();
     }
 
     public override void DidFailNavigation(
@@ -56,6 +59,7 @@ public class NavigationDelegate : WKNavigationDelegate
         _crashService.RecordNonFatal(
             new Exception(errorMessage),
             context: "WKNavigationDelegate.DidFailNavigation");
+        NavigationCompleted?.Invoke();
     }
 
     public override void DidFinishNavigation(WKWebView webView, WKNavigation navigation)
@@ -65,6 +69,7 @@ public class NavigationDelegate : WKNavigationDelegate
 
         _crashService.Log($"WebView load complete: {url} ({wallClockMs:F0}ms wall-clock)");
         _performanceService.RecordPageLoad(url, wallClockMs);
+        NavigationCompleted?.Invoke();
 
         _ = RecordJsTimingAsync(webView, url);
     }
