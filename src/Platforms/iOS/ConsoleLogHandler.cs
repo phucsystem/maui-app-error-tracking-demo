@@ -21,11 +21,13 @@ public class ConsoleLogHandler : NSObject, IWKScriptMessageHandler
 
         try
         {
-            var payload = JsonSerializer.Deserialize<ConsolePayload>(jsonString.ToString());
+            var payload = JsonSerializer.Deserialize<ConsolePayload>(
+                jsonString.ToString(),
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (payload is null) return;
 
             var logLine = $"[JS {payload.Level}] {payload.Message}";
-            System.Diagnostics.Debug.WriteLine(logLine);
+            Console.WriteLine(logLine);
             _crashService.Log(logLine);
 
             if (payload.Level == "error")
