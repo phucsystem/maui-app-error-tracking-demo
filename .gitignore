@@ -1,0 +1,19 @@
+## .NET MAUI
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+
+## Firebase (contains API keys)
+src/Platforms/iOS/GoogleService-Info.plist
+
+## IDE
+.vs/
+.vscode/
+*.DotSettings.user
+.idea/
+
+## macOS
+.DS_Store
+Thumbs.db
