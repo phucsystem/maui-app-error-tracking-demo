@@ -14,6 +14,12 @@ public class CrashService
             _crashlytics = CrossFirebaseCrashlytics.Current;
             _crashlytics.SetCrashlyticsCollectionEnabled(true);
             _isEnabled = true;
+
+            if (_crashlytics.DidCrashOnPreviousExecution())
+            {
+                System.Diagnostics.Debug.WriteLine("Crashlytics: previous session crashed, sending unsent reports");
+                _crashlytics.SendUnsentReports();
+            }
         }
         catch (Exception ex)
         {
@@ -21,6 +27,9 @@ public class CrashService
             System.Diagnostics.Debug.WriteLine($"Crashlytics unavailable: {ex.Message}");
         }
     }
+
+    public bool DidCrashOnPreviousExecution =>
+        _isEnabled && (_crashlytics?.DidCrashOnPreviousExecution() ?? false);
 
     public void RecordNonFatal(Exception exception, string? context = null)
     {

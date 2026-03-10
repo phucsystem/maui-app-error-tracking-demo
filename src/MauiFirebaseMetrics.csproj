@@ -15,6 +15,14 @@
 		<ApplicationVersion>1</ApplicationVersion>
 
 		<SupportedOSPlatformVersion>16.0</SupportedOSPlatformVersion>
+
+		<_ExportSymbolsExplicitly>false</_ExportSymbolsExplicitly>
+		<MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
+		<MtouchExtraArgs>-gcc_flags "-ObjC"</MtouchExtraArgs>
+
+		<CodesignKey>Apple Development: phucsystem.appleid@gmail.com (G6Z59K7HDT)</CodesignKey>
+		<CodesignProvision>Automatic</CodesignProvision>
+		<RuntimeIdentifier Condition="'$(Configuration)' == 'Debug'">ios-arm64</RuntimeIdentifier>
 	</PropertyGroup>
 
 	<ItemGroup>

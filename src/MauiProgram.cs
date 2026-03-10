@@ -53,10 +53,12 @@ public static class MauiProgram
                 try
                 {
                     CrossFirebase.Initialize();
+                    CrossFirebaseCrashlytics.Current.SetCrashlyticsCollectionEnabled(true);
+                    System.Diagnostics.Debug.WriteLine("Firebase + Crashlytics initialized successfully");
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Firebase init failed (missing GoogleService-Info.plist?): {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"Firebase init failed: {ex.Message}");
                 }
                 return false;
             }));

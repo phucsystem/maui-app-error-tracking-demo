@@ -10,6 +10,7 @@ public class NavigationDelegate : WKNavigationDelegate
     private readonly PerformanceService _performanceService;
     private readonly DownloadService _downloadService;
     private DateTime _navigationStartTime;
+    private bool _isInitialLoad = true;
 
     public event Action? NavigationCompleted;
 
@@ -69,9 +70,17 @@ public class NavigationDelegate : WKNavigationDelegate
 
         _crashService.Log($"WebView load complete: {url} ({wallClockMs:F0}ms wall-clock)");
         _performanceService.RecordPageLoad(url, wallClockMs);
+
+        if (_isInitialLoad)
+        {
+            _isInitialLoad = false;
+            _performanceService.RecordInitialWebViewLoad(wallClockMs);
+        }
+
         NavigationCompleted?.Invoke();
 
         _ = RecordJsTimingAsync(webView, url);
+        _ = InjectImageLoadObserverAsync(webView);
     }
 
     [Export("webViewWebContentProcessDidTerminate:")]
@@ -111,6 +120,48 @@ public class NavigationDelegate : WKNavigationDelegate
         WKWebView webView, WKNavigationResponse navigationResponse, WKDownload download)
     {
         download.Delegate = new DownloadDelegate(_downloadService);
+    }
+
+    private async Task InjectImageLoadObserverAsync(WKWebView webView)
+    {
+        try
+        {
+            const string script = """
+                (function() {
+                    if (window.__imageObserverInstalled) return;
+                    window.__imageObserverInstalled = true;
+
+                    var observer = new PerformanceObserver(function(list) {
+                        list.getEntries().forEach(function(entry) {
+                            if (entry.initiatorType !== 'img') return;
+                            var durationMs = Math.round(entry.duration);
+                            var sizeKb = Math.round((entry.transferSize || 0) / 1024);
+                            if (durationMs > 500 || sizeKb > 200) {
+                                window.webkit.messageHandlers.nativeConsole.postMessage(
+                                    JSON.stringify({
+                                        level: 'perf',
+                                        message: JSON.stringify({
+                                            type: 'heavy_image',
+                                            url: entry.name,
+                                            durationMs: durationMs,
+                                            sizeKb: sizeKb,
+                                            decodedBodySize: entry.decodedBodySize || 0
+                                        })
+                                    })
+                                );
+                            }
+                        });
+                    });
+                    observer.observe({ type: 'resource', buffered: true });
+                })();
+                """;
+
+            await webView.EvaluateJavaScriptAsync(script);
+        }
+        catch (Exception ex)
+        {
+            _crashService.Log($"Image observer injection failed: {ex.Message}");
+        }
     }
 
     private async Task RecordJsTimingAsync(WKWebView webView, string url)

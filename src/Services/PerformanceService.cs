@@ -19,6 +19,22 @@ public class PerformanceService
         _crashService.SetMetadata("startup_ms", ((long)startupMs).ToString());
     }
 
+    public void RecordInitialWebViewLoad(double wallClockMs)
+    {
+        var totalFromStartMs = (DateTime.UtcNow - AppStartup.ProcessStartTime).TotalMilliseconds;
+        _crashService.SetMetadata("webview_init_load_ms", ((long)wallClockMs).ToString());
+        _crashService.SetMetadata("webview_init_total_ms", ((long)totalFromStartMs).ToString());
+        _crashService.Log($"Initial WebView load: {wallClockMs:F0}ms (total from app start: {totalFromStartMs:F0}ms)");
+    }
+
+    public void RecordHeavyImageLoad(string imageUrl, long durationMs, long sizeKb)
+    {
+        _crashService.SetMetadata("heavy_image_url", TruncateUrl(imageUrl));
+        _crashService.SetMetadata("heavy_image_duration_ms", durationMs.ToString());
+        _crashService.SetMetadata("heavy_image_size_kb", sizeKb.ToString());
+        _crashService.Log($"Heavy image: {sizeKb}KB in {durationMs}ms — {TruncateUrl(imageUrl)}");
+    }
+
     public void RecordPageLoad(string url, double wallClockMs)
     {
         _lastPageLoadMs[url] = wallClockMs;

@@ -51,12 +51,14 @@ public class MetricWebViewHandler : WebViewHandler
     {
         base.ConnectHandler(platformView);
 
+        ClearWebViewCache();
+
         var crashService = MauiContext!.Services.GetRequiredService<CrashService>();
         var perfService = MauiContext!.Services.GetRequiredService<PerformanceService>();
         var downloadService = MauiContext!.Services.GetRequiredService<DownloadService>();
 
         // Console log bridge
-        _consoleLogHandler = new ConsoleLogHandler(crashService);
+        _consoleLogHandler = new ConsoleLogHandler(crashService, perfService);
         var userContent = platformView.Configuration.UserContentController;
         userContent.AddScriptMessageHandler(_consoleLogHandler, ConsoleHandlerName);
         userContent.AddUserScript(new WKUserScript(
@@ -94,6 +96,16 @@ public class MetricWebViewHandler : WebViewHandler
                     current = current.Parent;
                 }
             }
+        });
+    }
+
+    private static void ClearWebViewCache()
+    {
+        var dataStore = WKWebsiteDataStore.DefaultDataStore;
+        var allTypes = WKWebsiteDataStore.AllWebsiteDataTypes;
+        dataStore.RemoveDataOfTypes(allTypes, NSDate.DistantPast, () =>
+        {
+            System.Diagnostics.Debug.WriteLine("WebView cache cleared");
         });
     }
 
