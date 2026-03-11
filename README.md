@@ -109,6 +109,23 @@ flowchart TB
     style OVERRIDE fill:#fff8e1,stroke:#ff8f00,stroke-width:1px
 ```
 
+## Firebase Metrics: Standard vs Custom
+
+| Product | Type | Metric | Description |
+|---------|------|--------|-------------|
+| Crashlytics | Standard | Fatal crashes | Stack traces, device info, OS version |
+| Crashlytics | Standard | Crash-free users % | Auto-calculated from crash data |
+| Crashlytics | Standard | Breadcrumb timeline | Auto-collected app lifecycle events |
+| Crashlytics | **Custom** | 21 metadata keys | `setAttribute()` — startup_ms, http_error_status, js_ttfb_ms, etc. |
+| Crashlytics | **Custom** | 7 non-fatal error types | `recordError()` — JS errors, HTTP, network, slow response, image, slow task, WebView nav |
+| Crashlytics | **Custom** | Breadcrumb logs | `log()` — "WebView load complete", "Nav timing [...]", etc. |
+| Performance | Standard | App start time | Auto-collected app startup duration |
+| Performance | Standard | HTTP/S network requests | Auto-collected latency, payload size, success rate |
+| Performance | Standard | Screen rendering | Slow/frozen frames (Android only) |
+| Performance | **Custom** | `webview_page_load` trace | 1 trace with 4 metrics: `ttfb_ms`, `dom_interactive_ms`, `dom_complete_ms`, `total_load_ms` |
+| Analytics | Standard | Session & engagement | `first_open`, `session_start`, `screen_view`, retention |
+| Analytics | **Custom** | *(none)* | Auto-collection only — no custom events needed for this demo |
+
 ## Message Protocol
 
 The web app sends structured JSON via `postMessage()`:
