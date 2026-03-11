@@ -1,12 +1,25 @@
-## .NET MAUI
+## .NET MAUI (legacy backup)
 bin/
 obj/
 *.user
 *.suo
 *.userprefs
 
+## React Native
+node_modules/
+src/ios/Pods/
+src/ios/build/
+src/android/app/build/
+src/android/build/
+*.hprof
+
 ## Firebase (contains API keys)
 src/Platforms/iOS/GoogleService-Info.plist
+src/ios/ErrorTrackingDemo/GoogleService-Info.plist
+google-services.json
+
+## Metro
+.metro-health-check*
 
 ## IDE
 .vs/
