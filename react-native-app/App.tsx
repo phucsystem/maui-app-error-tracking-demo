@@ -30,12 +30,6 @@ const CONSOLE_OVERRIDE_SCRIPT = `
   console.log = function() { send('log', arguments); orig.log.apply(console, arguments); };
   console.warn = function() { send('warn', arguments); orig.warn.apply(console, arguments); };
   console.error = function() { send('error', arguments); orig.error.apply(console, arguments); };
-  window.addEventListener('error', function(e) {
-    send('error', [e.message + ' at ' + e.filename + ':' + e.lineno + ':' + e.colno]);
-  });
-  window.addEventListener('unhandledrejection', function(e) {
-    send('error', ['Unhandled promise rejection: ' + e.reason]);
-  });
 })();
 true;
 `;
@@ -71,16 +65,19 @@ const IMAGE_OBSERVER_SCRIPT = `
 true;
 `;
 
-const JS_TIMING_SCRIPT = `
+const NAV_TIMING_V2_SCRIPT = `
 (function() {
-  var timing = performance.timing;
+  var entries = performance.getEntriesByType('navigation');
+  if (!entries || entries.length === 0) return;
+  var nav = entries[0];
   var result = JSON.stringify({
-    domComplete: timing.domComplete - timing.navigationStart,
-    domInteractive: timing.domInteractive - timing.navigationStart,
-    loadEventEnd: timing.loadEventEnd - timing.navigationStart
+    ttfb: Math.round(nav.responseStart - nav.requestStart),
+    domInteractive: Math.round(nav.domInteractive),
+    domComplete: Math.round(nav.domComplete),
+    loadEventEnd: Math.round(nav.loadEventEnd)
   });
   window.ReactNativeWebView.postMessage(
-    JSON.stringify({ level: 'timing', message: result })
+    JSON.stringify({ level: 'nav-timing', message: result })
   );
 })();
 true;
@@ -124,7 +121,7 @@ function AppContent(): React.JSX.Element {
     }
 
     webViewRef.current?.injectJavaScript(IMAGE_OBSERVER_SCRIPT);
-    webViewRef.current?.injectJavaScript(JS_TIMING_SCRIPT);
+    webViewRef.current?.injectJavaScript(NAV_TIMING_V2_SCRIPT);
   }, []);
 
   const handleError = useCallback(
@@ -133,6 +130,7 @@ function AppContent(): React.JSX.Element {
       if (code === -999) return;
 
       setLoading(false);
+      performanceService.stopActiveTrace();
       crashService.setMetadata('webview_error_code', String(code));
       crashService.setMetadata('webview_url', url || 'unknown');
       crashService.recordNonFatal(
@@ -152,8 +150,13 @@ function AppContent(): React.JSX.Element {
       console.log(logLine);
       crashService.log(logLine);
 
-      if (payload.level === 'timing') {
-        performanceService.recordJsTiming(WEBVIEW_URL, payload.message);
+      if (payload.level === 'nav-timing') {
+        try {
+          const timingData = JSON.parse(payload.message);
+          performanceService.recordNavigationTiming(WEBVIEW_URL, timingData);
+        } catch {
+          crashService.log('Failed to parse nav-timing payload');
+        }
         return;
       }
 
@@ -172,6 +175,60 @@ function AppContent(): React.JSX.Element {
           new Error(`JS error: ${payload.message}`),
           'console.error',
         );
+        return;
+      }
+
+      if (payload.level === 'http-error') {
+        const errorData = payload.data || {};
+        crashService.setMetadata('http_error_status', String(errorData.status || 'unknown'));
+        crashService.setMetadata('http_error_url', String(errorData.url || 'unknown').substring(0, 128));
+        crashService.setMetadata('http_error_method', String(errorData.method || 'unknown'));
+        crashService.recordNonFatal(
+          new Error(`HTTP ${errorData.status}: ${payload.message}`),
+          'WebView.httpError',
+        );
+        return;
+      }
+
+      if (payload.level === 'network-error') {
+        const errorData = payload.data || {};
+        crashService.setMetadata('network_error_url', String(errorData.url || 'unknown').substring(0, 128));
+        crashService.recordNonFatal(
+          new Error(`Network error: ${payload.message}`),
+          'WebView.networkError',
+        );
+        return;
+      }
+
+      if (payload.level === 'slow-response') {
+        const metricData = payload.data || {};
+        crashService.setMetadata('slow_response_url', String(metricData.url || 'unknown').substring(0, 128));
+        crashService.setMetadata('slow_response_ms', String(metricData.durationMs || 0));
+        crashService.recordNonFatal(
+          new Error(`Slow response: ${payload.message}`),
+          'WebView.slowResponse',
+        );
+        return;
+      }
+
+      if (payload.level === 'image-error') {
+        const errorData = payload.data || {};
+        crashService.setMetadata('image_error_url', String(errorData.url || 'unknown').substring(0, 128));
+        crashService.recordNonFatal(
+          new Error(`Image failed: ${payload.message}`),
+          'WebView.imageError',
+        );
+        return;
+      }
+
+      if (payload.level === 'slow-task') {
+        const metricData = payload.data || {};
+        crashService.setMetadata('slow_task_ms', String(metricData.durationMs || 0));
+        crashService.recordNonFatal(
+          new Error(`Long task: ${payload.message}`),
+          'WebView.slowTask',
+        );
+        return;
       }
     } catch {
       // Malformed payload — ignore
@@ -191,9 +248,10 @@ function AppContent(): React.JSX.Element {
     Alert.alert('Non-Fatal Sent', 'Non-fatal error recorded to Crashlytics.');
   }, []);
 
-  const handleShouldStartLoad = useCallback((_event: WebViewNavigation) => {
+  const handleShouldStartLoad = useCallback((event: WebViewNavigation) => {
     navigationStartTime.current = Date.now();
     crashService.log('WebView navigation started');
+    performanceService.startWebViewTrace(event.url || WEBVIEW_URL);
     return true;
   }, []);
 

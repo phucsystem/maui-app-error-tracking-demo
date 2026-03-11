@@ -56,6 +56,10 @@ yarn-error.log
 # Bundle artifact
 *.jsbundle
 
+# Firebase credentials
+ios/GoogleService-Info.plist
+ios/ErrorTrackingDemo/GoogleService-Info.plist
+
 # Ruby / CocoaPods
 **/Pods/
 /vendor/bundle/

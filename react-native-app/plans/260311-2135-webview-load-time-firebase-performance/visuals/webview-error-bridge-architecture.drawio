@@ -1,0 +1,390 @@
+<mxfile host="app.diagrams.net" modified="2026-03-11T22:30:00.000Z" agent="Claude Code" version="24.0.0" type="device">
+  <diagram id="webview-error-bridge" name="WebView Error Bridge Architecture">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="title" value="WebView → React Native Error Bridge Architecture" style="text;html=1;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;fillColor=none;strokeColor=none;fontColor=#1a1a2e;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="800" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== WEB APP CONTAINER ==================== -->
+        <mxCell id="webapp-container" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f4ff;strokeColor=#4361ee;strokeWidth=2;dashed=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="700" height="780" as="geometry"/>
+        </mxCell>
+        <mxCell id="webapp-label" value="Web App (Vite + TypeScript)&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#666;&quot;&gt;demo-web-view-error — GitHub Pages&lt;/font&gt;" style="text;html=1;fontSize=14;fontStyle=1;align=left;verticalAlign=top;fillColor=none;strokeColor=none;fontColor=#4361ee;" vertex="1" parent="1">
+          <mxGeometry x="55" y="88" width="350" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- main.ts -->
+        <mxCell id="main-ts" value="&lt;b&gt;main.ts&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;DOM setup, button handlers&lt;br&gt;initBridge() called on startup&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4361ee;strokeWidth=1.5;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="250" y="140" width="240" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Error Sources Group -->
+        <mxCell id="sources-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f4845f;strokeWidth=1.5;dashed=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="230" width="660" height="180" as="geometry"/>
+        </mxCell>
+        <mxCell id="sources-label" value="Error &amp; Metric Sources" style="text;html=1;fontSize=12;fontStyle=1;align=left;verticalAlign=top;fillColor=none;strokeColor=none;fontColor=#f4845f;" vertex="1" parent="1">
+          <mxGeometry x="75" y="235" width="200" height="20" as="geometry"/>
+        </mxCell>
+
+        <!-- Light API -->
+        <mxCell id="light-api" value="&lt;b&gt;Light API&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;jsonplaceholder/posts/1&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#66bb6a;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="265" width="140" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- Heavy API -->
+        <mxCell id="heavy-api" value="&lt;b&gt;Heavy API&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;jsonplaceholder/photos (5000)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9c4;strokeColor=#fdd835;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="240" y="265" width="140" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- Random API Chaos -->
+        <mxCell id="chaos-api" value="&lt;b&gt;Random API Chaos&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;60% fail, simulated latency&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffebee;strokeColor=#ef5350;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="400" y="265" width="145" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- Slow DOM -->
+        <mxCell id="slow-dom" value="&lt;b&gt;Slow DOM Load&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;200-500 nodes + layout thrash&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#ab47bc;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="565" y="265" width="140" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- Heavy Images -->
+        <mxCell id="heavy-images" value="&lt;b&gt;Heavy Images&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;5 large Wikipedia images&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2fd;strokeColor=#42a5f5;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="330" width="140" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- Console Errors -->
+        <mxCell id="console-errors" value="&lt;b&gt;console.error()&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Manual error button&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#e91e63;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="240" y="330" width="140" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== BRIDGE MODULES ==================== -->
+
+        <!-- axios-client.ts -->
+        <mxCell id="axios-client" value="&lt;b&gt;axios-client.ts&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;Request interceptor (timing)&lt;br&gt;Response interceptor (errors + slow &gt;1s)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8eaf6;strokeColor=#5c6bc0;strokeWidth=2;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="445" width="280" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- firebase-bridge.ts -->
+        <mxCell id="firebase-bridge" value="&lt;b&gt;firebase-bridge.ts&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;reportError() · reportMetric() · initBridge()&lt;br&gt;MutationObserver (images) · PerformanceObserver (longtask)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2f1;strokeColor=#009688;strokeWidth=2;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="530" width="360" height="65" as="geometry"/>
+        </mxCell>
+
+        <!-- sendToNative -->
+        <mxCell id="send-to-native" value="&lt;b&gt;sendToNative()&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;window.ReactNativeWebView.postMessage()&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#009688;strokeColor=#00796b;fontColor=#ffffff;strokeWidth=2;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="170" y="630" width="310" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Message Format Box -->
+        <mxCell id="msg-format" value="&lt;font style=&quot;font-family:monospace;font-size:10px;&quot;&gt;{&lt;br&gt;&amp;nbsp;&amp;nbsp;level: &quot;http-error&quot; | &quot;network-error&quot; |&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot;slow-response&quot; | &quot;image-error&quot; |&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot;slow-task&quot;,&lt;br&gt;&amp;nbsp;&amp;nbsp;message: string,&lt;br&gt;&amp;nbsp;&amp;nbsp;data?: { url, status, durationMs, ... }&lt;br&gt;}&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#9e9e9e;strokeWidth=1;align=left;verticalAlign=middle;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="510" y="520" width="210" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== ARROWS: Sources → Modules ==================== -->
+
+        <!-- Light API → axios -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#5c6bc0;strokeWidth=1.5;" edge="1" source="light-api" target="axios-client" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Heavy API → axios -->
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#5c6bc0;strokeWidth=1.5;" edge="1" source="heavy-api" target="axios-client" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Chaos → bridge (direct call) -->
+        <mxCell id="e3" value="direct call" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#009688;strokeWidth=1.5;fontStyle=2;fontSize=9;labelBackgroundColor=#ffffff;" edge="1" source="chaos-api" target="firebase-bridge" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="473" y="420"/>
+              <mxPoint x="380" y="420"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- axios → bridge -->
+        <mxCell id="e4" value="reportError / reportMetric" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#009688;strokeWidth=1.5;fontStyle=2;fontSize=9;labelBackgroundColor=#ffffff;" edge="1" source="axios-client" target="firebase-bridge" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- bridge → sendToNative -->
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#00796b;strokeWidth=2;" edge="1" source="firebase-bridge" target="send-to-native" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Images → bridge (MutationObserver) -->
+        <mxCell id="e6" value="MutationObserver" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#009688;strokeWidth=1.5;fontStyle=2;fontSize=9;labelBackgroundColor=#ffffff;" edge="1" source="heavy-images" target="firebase-bridge" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="150" y="420"/>
+              <mxPoint x="150" y="520"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Slow DOM → bridge (PerformanceObserver) -->
+        <mxCell id="e7" value="PerformanceObserver" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#009688;strokeWidth=1.5;fontStyle=2;fontSize=9;labelBackgroundColor=#ffffff;" edge="1" source="slow-dom" target="firebase-bridge" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="635" y="440"/>
+              <mxPoint x="460" y="440"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- msg-format arrow -->
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#9e9e9e;strokeWidth=1;dashed=1;" edge="1" source="firebase-bridge" target="msg-format" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== BRIDGE ARROW (postMessage) ==================== -->
+        <mxCell id="bridge-arrow" value="&lt;b&gt;postMessage(JSON)&lt;/b&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#d32f2f;strokeWidth=3;fontStyle=1;fontSize=11;fontColor=#d32f2f;labelBackgroundColor=#ffffff;" edge="1" source="send-to-native" target="rn-handler" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="325" y="720"/>
+              <mxPoint x="760" y="720"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Bridge boundary line -->
+        <mxCell id="bridge-line" value="&lt;font style=&quot;font-size:11px;color:#d32f2f;&quot;&gt;⬤ WebView Bridge Boundary ⬤&lt;/font&gt;" style="text;html=1;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;fillColor=#ffebee;strokeColor=#d32f2f;strokeWidth=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="622" y="705" width="230" height="28" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== CONSOLE OVERRIDE PATH ==================== -->
+        <mxCell id="console-override" value="&lt;b&gt;CONSOLE_OVERRIDE_SCRIPT&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;color:#555;&quot;&gt;Injected by RN WebView&lt;br&gt;Forwards console.log/warn/error&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8e1;strokeColor=#ff8f00;strokeWidth=1.5;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="510" y="440" width="200" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Console errors → override -->
+        <mxCell id="e9" value="console.error()" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#ff8f00;strokeWidth=1.5;fontStyle=2;fontSize=9;labelBackgroundColor=#ffffff;" edge="1" source="console-errors" target="console-override" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="610" y="353"/>
+              <mxPoint x="610" y="420"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Console override → sendToNative (separate path) -->
+        <mxCell id="e10" value="{level:'error'}" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#ff8f00;strokeWidth=1.5;dashed=1;fontStyle=2;fontSize=9;labelBackgroundColor=#ffffff;" edge="1" source="console-override" target="send-to-native" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="610" y="670"/>
+              <mxPoint x="480" y="670"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== RN APP CONTAINER ==================== -->
+        <mxCell id="rn-container" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fff0;strokeColor=#2d6a4f;strokeWidth=2;dashed=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="860" y="80" width="700" height="780" as="geometry"/>
+        </mxCell>
+        <mxCell id="rn-label" value="React Native App (iOS)&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#666;&quot;&gt;react-native-app — Phuc's iPhone&lt;/font&gt;" style="text;html=1;fontSize=14;fontStyle=1;align=left;verticalAlign=top;fillColor=none;strokeColor=none;fontColor=#2d6a4f;" vertex="1" parent="1">
+          <mxGeometry x="875" y="88" width="350" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- handleMessage -->
+        <mxCell id="rn-handler" value="&lt;b&gt;handleMessage()&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;App.tsx — JSON.parse + level routing&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2d6a4f;strokeWidth=2;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="930" y="150" width="260" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Level Router -->
+        <mxCell id="router" value="&lt;b&gt;Level Router&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#2d6a4f;strokeWidth=1.5;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="240" width="120" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e-handler-router" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#2d6a4f;strokeWidth=2;" edge="1" source="rn-handler" target="router" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== NEW HANDLERS (5 bridge levels) ==================== -->
+
+        <!-- http-error handler -->
+        <mxCell id="h-http" value="&lt;b&gt;http-error&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;HTTP 4xx/5xx&lt;br&gt;Sets: status, url, method&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffebee;strokeColor=#c62828;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="885" y="340" width="135" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- network-error handler -->
+        <mxCell id="h-network" value="&lt;b&gt;network-error&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Connection failures&lt;br&gt;Sets: url&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#ad1457;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="340" width="135" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- slow-response handler -->
+        <mxCell id="h-slow-resp" value="&lt;b&gt;slow-response&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Response &gt;1s&lt;br&gt;Sets: url, durationMs&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#e65100;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1195" y="340" width="135" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- image-error handler -->
+        <mxCell id="h-image" value="&lt;b&gt;image-error&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Broken images&lt;br&gt;Sets: url&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2fd;strokeColor=#1565c0;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1350" y="340" width="135" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- slow-task handler -->
+        <mxCell id="h-task" value="&lt;b&gt;slow-task&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Long task &gt;100ms&lt;br&gt;Sets: durationMs&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#6a1b9a;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="885" y="420" width="135" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Existing handlers -->
+        <mxCell id="h-error" value="&lt;b&gt;error&lt;/b&gt;&lt;font style=&quot;font-size:9px;&quot;&gt; (existing)&lt;br&gt;console.error forwarding&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#efebe9;strokeColor=#795548;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="420" width="135" height="55" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="h-perf" value="&lt;b&gt;perf&lt;/b&gt;&lt;font style=&quot;font-size:9px;&quot;&gt; (existing)&lt;br&gt;Heavy image perf data&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#efebe9;strokeColor=#795548;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1195" y="420" width="135" height="55" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="h-nav" value="&lt;b&gt;nav-timing&lt;/b&gt;&lt;font style=&quot;font-size:9px;&quot;&gt; (existing)&lt;br&gt;Navigation Timing V2&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#efebe9;strokeColor=#795548;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1350" y="420" width="135" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Router → handlers -->
+        <mxCell id="r1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#2d6a4f;strokeWidth=1;" edge="1" source="router" target="h-http" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#2d6a4f;strokeWidth=1;" edge="1" source="router" target="h-network" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#2d6a4f;strokeWidth=1;" edge="1" source="router" target="h-slow-resp" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#2d6a4f;strokeWidth=1;" edge="1" source="router" target="h-image" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#795548;strokeWidth=1;dashed=1;" edge="1" source="router" target="h-task" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#795548;strokeWidth=1;dashed=1;" edge="1" source="router" target="h-error" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#795548;strokeWidth=1;dashed=1;" edge="1" source="router" target="h-perf" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#795548;strokeWidth=1;dashed=1;" edge="1" source="router" target="h-nav" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== SERVICES ==================== -->
+
+        <!-- crashService -->
+        <mxCell id="crash-service" value="&lt;b&gt;crashService&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;crash-service.ts&lt;br&gt;setMetadata() + recordNonFatal()&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffcdd2;strokeColor=#c62828;strokeWidth=2;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="930" y="530" width="250" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- performanceService -->
+        <mxCell id="perf-service" value="&lt;b&gt;performanceService&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;performance-service.ts&lt;br&gt;recordHeavyImageLoad() + recordNavTiming()&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#2e7d32;strokeWidth=2;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="530" width="280" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Handlers → services -->
+        <mxCell id="s1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#c62828;strokeWidth=1.5;" edge="1" source="h-http" target="crash-service" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#c62828;strokeWidth=1.5;" edge="1" source="h-network" target="crash-service" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#c62828;strokeWidth=1.5;" edge="1" source="h-slow-resp" target="crash-service" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#c62828;strokeWidth=1.5;" edge="1" source="h-image" target="crash-service" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#c62828;strokeWidth=1.5;" edge="1" source="h-task" target="crash-service" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="s6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#c62828;strokeWidth=1.5;" edge="1" source="h-error" target="crash-service" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="s7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#2e7d32;strokeWidth=1.5;" edge="1" source="h-perf" target="perf-service" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="s8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#2e7d32;strokeWidth=1.5;" edge="1" source="h-nav" target="perf-service" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== FIREBASE ==================== -->
+
+        <!-- Firebase Crashlytics -->
+        <mxCell id="firebase-crash" value="&lt;b&gt;Firebase Crashlytics&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Non-fatal errors + metadata&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ff6f00;strokeColor=#e65100;fontColor=#ffffff;strokeWidth=2;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="930" y="650" width="250" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Firebase Performance -->
+        <mxCell id="firebase-perf" value="&lt;b&gt;Firebase Performance&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Traces + custom metrics&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ff6f00;strokeColor=#e65100;fontColor=#ffffff;strokeWidth=2;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="650" width="280" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Services → Firebase -->
+        <mxCell id="f1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#e65100;strokeWidth=2;" edge="1" source="crash-service" target="firebase-crash" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="f2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#e65100;strokeWidth=2;" edge="1" source="perf-service" target="firebase-perf" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Firebase Console -->
+        <mxCell id="firebase-console" value="&lt;b&gt;Firebase Console&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Dashboard · Alerts · Issue tracking&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bf360c;strokeColor=#8c1a02;fontColor=#ffffff;strokeWidth=2;shadow=1;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="750" width="280" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="f3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#8c1a02;strokeWidth=2;" edge="1" source="firebase-crash" target="firebase-console" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="f4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#8c1a02;strokeWidth=2;" edge="1" source="firebase-perf" target="firebase-console" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ==================== LEGEND ==================== -->
+        <mxCell id="legend-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#bdbdbd;strokeWidth=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="720" width="300" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend-title" value="Legend" style="text;html=1;fontSize=12;fontStyle=1;align=left;fillColor=none;strokeColor=none;fontColor=#333;" vertex="1" parent="1">
+          <mxGeometry x="75" y="725" width="80" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="leg1" value="" style="rounded=1;fillColor=#e0f2f1;strokeColor=#009688;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="75" y="750" width="16" height="12" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg1t" value="&lt;font style=&quot;font-size:10px;&quot;&gt;New bridge module (Phase 1)&lt;/font&gt;" style="text;html=1;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="100" y="745" width="180" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="leg2" value="" style="rounded=1;fillColor=#e8eaf6;strokeColor=#5c6bc0;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="75" y="770" width="16" height="12" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg2t" value="&lt;font style=&quot;font-size:10px;&quot;&gt;New axios client (Phase 2)&lt;/font&gt;" style="text;html=1;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="100" y="765" width="180" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="leg3" value="" style="rounded=1;fillColor=#ffcdd2;strokeColor=#c62828;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="75" y="790" width="16" height="12" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg3t" value="&lt;font style=&quot;font-size:10px;&quot;&gt;New RN handlers (Phase 3)&lt;/font&gt;" style="text;html=1;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="100" y="785" width="180" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="leg4" value="" style="rounded=1;fillColor=#efebe9;strokeColor=#795548;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="75" y="810" width="16" height="12" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg4t" value="&lt;font style=&quot;font-size:10px;&quot;&gt;Existing (unchanged)&lt;/font&gt;" style="text;html=1;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="100" y="805" width="180" height="20" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="leg5" value="" style="endArrow=classic;strokeColor=#d32f2f;strokeWidth=3;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="75" y="838" as="sourcePoint"/>
+            <mxPoint x="91" y="838" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg5t" value="&lt;font style=&quot;font-size:10px;&quot;&gt;WebView bridge (postMessage)&lt;/font&gt;" style="text;html=1;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="100" y="828" width="180" height="20" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

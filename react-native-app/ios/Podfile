@@ -34,6 +34,10 @@ target 'ErrorTrackingDemo' do
   pod 'nanopb', :modular_headers => true
   pod 'FirebaseCoreExtension', :modular_headers => true
   pod 'FirebaseInstallations', :modular_headers => true
+  pod 'FirebasePerformance', :modular_headers => true
+  pod 'FirebaseRemoteConfig', :modular_headers => true
+  pod 'FirebaseABTesting', :modular_headers => true
+  pod 'FirebaseSharedSwift', :modular_headers => true
 
   post_install do |installer|
     react_native_post_install(

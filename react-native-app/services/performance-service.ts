@@ -1,9 +1,18 @@
+import perf, {type FirebasePerformanceTypes} from '@react-native-firebase/perf';
 import {crashService} from './crash-service';
 
 const appStartTime = Date.now();
 
+interface NavigationTimingData {
+  ttfb: number;
+  domInteractive: number;
+  domComplete: number;
+  loadEventEnd: number;
+}
+
 class PerformanceService {
   private lastPageLoadMs: Map<string, number> = new Map();
+  private activeTrace: FirebasePerformanceTypes.Trace | null = null;
 
   recordAppStartup(): void {
     const startupMs = Date.now() - appStartTime;
@@ -34,27 +43,54 @@ class PerformanceService {
     crashService.setMetadata('last_page_load_ms', String(Math.round(wallClockMs)));
   }
 
-  recordJsTiming(url: string, timingJson: string): void {
+  async startWebViewTrace(url: string): Promise<void> {
     try {
-      const timing = JSON.parse(timingJson);
-      if (!timing) return;
+      await this.stopActiveTrace();
+      const trace = await perf().startTrace('webview_page_load');
+      trace.putAttribute('url', this.truncateUrl(url));
+      this.activeTrace = trace;
+    } catch (error) {
+      crashService.log(`Failed to start perf trace: ${error}`);
+    }
+  }
 
-      if (timing.domComplete !== undefined) {
-        crashService.setMetadata('js_dom_complete_ms', String(timing.domComplete));
-      }
-      if (timing.domInteractive !== undefined) {
-        crashService.setMetadata('js_dom_interactive_ms', String(timing.domInteractive));
-      }
-      if (timing.loadEventEnd !== undefined) {
-        crashService.setMetadata('js_load_event_ms', String(timing.loadEventEnd));
+  async recordNavigationTiming(url: string, timingData: NavigationTimingData): Promise<void> {
+    try {
+      if (this.activeTrace) {
+        this.activeTrace.putMetric('ttfb_ms', Math.round(timingData.ttfb));
+        this.activeTrace.putMetric('dom_interactive_ms', Math.round(timingData.domInteractive));
+        this.activeTrace.putMetric('dom_complete_ms', Math.round(timingData.domComplete));
+        this.activeTrace.putMetric('total_load_ms', Math.round(timingData.loadEventEnd));
+        await this.activeTrace.stop();
+        this.activeTrace = null;
       }
 
+      crashService.setMetadata('js_ttfb_ms', String(Math.round(timingData.ttfb)));
+      crashService.setMetadata('js_dom_interactive_ms', String(Math.round(timingData.domInteractive)));
+      crashService.setMetadata('js_dom_complete_ms', String(Math.round(timingData.domComplete)));
+      crashService.setMetadata('js_load_event_ms', String(Math.round(timingData.loadEventEnd)));
+
+      const truncatedUrl = this.truncateUrl(url);
       crashService.log(
-        `JS timing [${this.truncateUrl(url)}]: ` +
-          `interactive=${timing.domInteractive}ms, complete=${timing.domComplete}ms, load=${timing.loadEventEnd}ms`,
+        `Nav timing [${truncatedUrl}]: ` +
+          `ttfb=${Math.round(timingData.ttfb)}ms, ` +
+          `interactive=${Math.round(timingData.domInteractive)}ms, ` +
+          `complete=${Math.round(timingData.domComplete)}ms, ` +
+          `load=${Math.round(timingData.loadEventEnd)}ms`,
       );
     } catch (error) {
-      crashService.log(`JS timing parse failed: ${error}`);
+      crashService.log(`Failed to record nav timing: ${error}`);
+    }
+  }
+
+  async stopActiveTrace(): Promise<void> {
+    if (this.activeTrace) {
+      try {
+        await this.activeTrace.stop();
+      } catch {
+        // Trace already stopped or invalid
+      }
+      this.activeTrace = null;
     }
   }
 
