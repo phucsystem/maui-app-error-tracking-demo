@@ -164,6 +164,10 @@ cd ios && pod install && cd ..
 npx react-native run-ios
 ```
 
+## Documentation
+
+- [Error & Log Handling from WebView](react-native-app/docs/error-and-log-handling-from-webview.md) — JS bridge architecture, message protocol, routing, and Crashlytics metadata reference
+
 ## Project Structure
 
 ```
