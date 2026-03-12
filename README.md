@@ -204,3 +204,10 @@ react-native-app/
 | `heavy_image_url` | Slow/large image URL |
 | `heavy_image_duration_ms` | Image load duration |
 | `heavy_image_size_kb` | Image transfer size |
+
+## References
+
+- [Demo WebView error source code](https://github.com/phucsystem/demo-web-view-error) — Web app loaded in the WebView for error and performance testing
+- [Set up alerts for performance issues (Firebase)](https://firebase.google.com/docs/perf-mon/alerts) — Configure alerts for metric regressions in Firebase Performance Monitoring
+- [App start, foreground, background traces (Firebase)](https://firebase.google.com/docs/perf-mon/app-start-foreground-background-traces?platform=ios) — Auto-collected app lifecycle performance traces on iOS
+- [Screen rendering performance traces (Firebase)](https://firebase.google.com/docs/perf-mon/screen-traces?platform=ios) — Monitor slow and frozen frames per screen on iOS
