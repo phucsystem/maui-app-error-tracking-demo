@@ -17,7 +17,8 @@ react-native-app/
 │
 ├── services/
 │   ├── crash-service.ts             # Firebase Crashlytics wrapper
-│   ├── performance-service.ts       # Firebase Performance + Navigation Timing
+│   ├── performance-service.ts       # Firebase Performance + Navigation Timing + HTTP metrics
+│   ├── device-context-service.ts    # Device context: user UUID, country ISO, brand, device model
 │   └── download-service.ts          # Download progress & throughput tracking (prepared, unused)
 │
 ├── ios/
@@ -83,7 +84,18 @@ Manages Firebase Performance traces and Crashlytics metadata for timing data.
 | `startWebViewTrace(url)` | Begin Firebase Performance trace |
 | `recordNavigationTiming(url, data)` | Record TTFB, DOM interactive/complete, load event |
 | `recordHeavyImageLoad(url, ms, kb)` | Track slow/large images (>500ms or >200KB) |
+| `recordApiTiming(data)` | Create Firebase HTTP metric for WebView API call |
 | `stopActiveTrace()` | Stop current Firebase trace |
+
+### DeviceContextService (`services/device-context-service.ts`)
+Resolves and persists device context on first launch.
+
+| Method | Purpose |
+|--------|---------|
+| `initialize()` | Resolve country ISO, device model, generate/load UUID |
+| `getContext()` | Return cached context (null before init) |
+
+Context fields: `userUuid` (persisted in AsyncStorage), `countryIso` (device locale), `brand` (commercial brand), `deviceModel` (from react-native-device-info).
 
 ### DownloadService (`services/download-service.ts`)
 Tracks download progress and throughput. **Prepared but not wired to UI** — ready for future download tracking features.
@@ -96,6 +108,8 @@ Tracks download progress and throughput. **Prepared but not wired to UI** — re
 | `@react-native-firebase/app` | Firebase core |
 | `@react-native-firebase/crashlytics` | Crash & error reporting |
 | `@react-native-firebase/perf` | Performance monitoring traces |
+| `@react-native-async-storage/async-storage` | Persistent key-value storage (user UUID) |
+| `react-native-device-info` | Device model, brand, system info |
 | `react-native-safe-area-context` | Safe area insets for notch devices |
 
 ## App Lifecycle

@@ -47,16 +47,20 @@ flowchart TB
             R_SLOW["'slow-response'<br/>Response > 1s"]
             R_IMG["'image-error'<br/>Broken image loads"]
             R_TASK["'slow-task'<br/>Long tasks > 100ms"]
+            R_APITIMING["'api-timing'<br/>All API call metrics"]
             R_PERF["'perf'<br/>Heavy image data"]
             R_NAV["'nav-timing'<br/>Navigation Timing V2"]
         end
 
+        DEV_CTX["DeviceContextService<br/>UUID · country · brand · model"]
         CRASH_SVC["CrashService<br/>setMetadata() + recordNonFatal()"]
-        PERF_SVC["PerformanceService<br/>Firebase Performance traces"]
+        PERF_SVC["PerformanceService<br/>Firebase Performance traces + HTTP metrics"]
 
         HANDLER --> ROUTES
         R_ERROR & R_HTTP & R_NET & R_SLOW & R_IMG & R_TASK --> CRASH_SVC
-        R_PERF & R_NAV --> PERF_SVC
+        R_APITIMING & R_PERF & R_NAV --> PERF_SVC
+        DEV_CTX -.-> CRASH_SVC
+        DEV_CTX -.-> PERF_SVC
     end
 
     subgraph WEBVIEW_NATIVE["WebView Native Events"]
@@ -127,18 +131,19 @@ All messages use the same JSON structure via `postMessage()`:
 
 ```json
 {
-  "level": "error | http-error | network-error | slow-response | image-error | slow-task | perf | nav-timing | log | warn",
+  "level": "error | http-error | network-error | slow-response | image-error | slow-task | api-timing | perf | nav-timing | log | warn",
   "message": "Human-readable description or JSON-encoded data",
   "data": {
     "url": "https://...",
     "status": 500,
     "method": "GET",
-    "durationMs": 1234
+    "durationMs": 1234,
+    "responseSize": 2048
   }
 }
 ```
 
-The `data` field is optional and used by structured error types (http-error, network-error, slow-response, image-error, slow-task).
+The `data` field is optional and used by structured error types (http-error, network-error, slow-response, image-error, slow-task, api-timing).
 
 ### Step 4: Message Routing in React Native
 
@@ -150,6 +155,9 @@ handleMessage(event)
 ├── Parse JSON payload
 ├── Validate: must have level + message
 ├── Log to console + Crashlytics log buffer
+│
+├── level === "api-timing"
+│   └── Create Firebase HTTP metric → performanceService.recordApiTiming()
 │
 ├── level === "nav-timing"
 │   └── Parse timing data → performanceService.recordNavigationTiming()

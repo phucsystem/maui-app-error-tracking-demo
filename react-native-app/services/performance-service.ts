@@ -1,5 +1,6 @@
 import perf, {type FirebasePerformanceTypes} from '@react-native-firebase/perf';
 import {crashService} from './crash-service';
+import {deviceContextService} from './device-context-service';
 
 const appStartTime = Date.now();
 
@@ -8,6 +9,15 @@ interface NavigationTimingData {
   domInteractive: number;
   domComplete: number;
   loadEventEnd: number;
+}
+
+interface ApiTimingData {
+  url: string;
+  method: string;
+  status: number;
+  durationMs: number;
+  requestSize?: number;
+  responseSize?: number;
 }
 
 class PerformanceService {
@@ -48,10 +58,21 @@ class PerformanceService {
       await this.stopActiveTrace();
       const trace = await perf().startTrace('webview_page_load');
       trace.putAttribute('url', this.truncateUrl(url));
+      this.applyDeviceAttributes(trace);
       this.activeTrace = trace;
     } catch (error) {
       crashService.log(`Failed to start perf trace: ${error}`);
     }
+  }
+
+  private applyDeviceAttributes(trace: FirebasePerformanceTypes.Trace): void {
+    const context = deviceContextService.getContext();
+    if (!context) return;
+
+    trace.putAttribute('user_uuid', context.userUuid);
+    trace.putAttribute('country_iso', context.countryIso);
+    trace.putAttribute('brand', context.brand);
+    trace.putAttribute('device_model', context.deviceModel);
   }
 
   async recordNavigationTiming(url: string, timingData: NavigationTimingData): Promise<void> {
@@ -92,6 +113,50 @@ class PerformanceService {
       }
       this.activeTrace = null;
     }
+  }
+
+  async recordApiTiming(timing: ApiTimingData): Promise<void> {
+    try {
+      const httpMethod = this.toHttpMethod(timing.method);
+      const httpMetric = await perf().newHttpMetric(timing.url, httpMethod);
+
+      httpMetric.setHttpResponseCode(timing.status);
+      if (timing.requestSize) {
+        httpMetric.setRequestPayloadSize(timing.requestSize);
+      }
+      if (timing.responseSize) {
+        httpMetric.setResponsePayloadSize(timing.responseSize);
+      }
+      httpMetric.setResponseContentType('application/json');
+
+      const context = deviceContextService.getContext();
+      if (context) {
+        httpMetric.putAttribute('user_uuid', context.userUuid);
+        httpMetric.putAttribute('country_iso', context.countryIso);
+        httpMetric.putAttribute('brand', context.brand);
+        httpMetric.putAttribute('device_model', context.deviceModel);
+      }
+
+      await httpMetric.start();
+      await httpMetric.stop();
+
+      const truncatedUrl = this.truncateUrl(timing.url);
+      crashService.log(
+        `API ${timing.method} ${truncatedUrl}: ${timing.status} in ${timing.durationMs}ms`,
+      );
+    } catch (error) {
+      crashService.log(`Failed to record API timing: ${error}`);
+    }
+  }
+
+  private toHttpMethod(method: string): FirebasePerformanceTypes.HttpMethod {
+    const upper = method.toUpperCase();
+    const validMethods: FirebasePerformanceTypes.HttpMethod[] = [
+      'GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTIONS', 'TRACE', 'CONNECT',
+    ];
+    return validMethods.includes(upper as FirebasePerformanceTypes.HttpMethod)
+      ? (upper as FirebasePerformanceTypes.HttpMethod)
+      : 'GET';
   }
 
   recordCustomMetric(metricName: string, durationMs: number): void {

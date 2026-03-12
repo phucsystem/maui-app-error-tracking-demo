@@ -10,6 +10,7 @@ import {
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {WebView, type WebViewMessageEvent, type WebViewNavigation} from 'react-native-webview';
 import {crashService} from './services/crash-service';
+import {deviceContextService} from './services/device-context-service';
 import {performanceService} from './services/performance-service';
 
 const WEBVIEW_URL = 'https://phucsystem.github.io/demo-web-view-error/';
@@ -106,6 +107,16 @@ function AppContent(): React.JSX.Element {
 
   useEffect(() => {
     performanceService.recordAppStartup();
+    deviceContextService.initialize().then(context => {
+      crashService.setUserId(context.userUuid);
+      crashService.setMetadata('user_uuid', context.userUuid);
+      crashService.setMetadata('country_iso', context.countryIso);
+      crashService.setMetadata('brand', context.brand);
+      crashService.setMetadata('device_model', context.deviceModel);
+      crashService.log(
+        `Device context: ${context.deviceModel}, ${context.countryIso}, ${context.brand}, uuid=${context.userUuid}`,
+      );
+    });
   }, []);
 
   const handleLoadEnd = useCallback(() => {
@@ -157,6 +168,19 @@ function AppContent(): React.JSX.Element {
         } catch {
           crashService.log('Failed to parse nav-timing payload');
         }
+        return;
+      }
+
+      if (payload.level === 'api-timing') {
+        const timingData = payload.data || {};
+        performanceService.recordApiTiming({
+          url: String(timingData.url || ''),
+          method: String(timingData.method || 'GET'),
+          status: Number(timingData.status || 0),
+          durationMs: Number(timingData.durationMs || 0),
+          requestSize: timingData.requestSize ? Number(timingData.requestSize) : undefined,
+          responseSize: timingData.responseSize ? Number(timingData.responseSize) : undefined,
+        });
         return;
       }
 
